@@ -13,7 +13,7 @@ THread C sets the value point = CGpoint(x: 5, y:5)
 
 All three threads tries to access the variable point at the same time . Here we cannot determine the output of the point when it is accessed by Thread A . It could be (4, 4) or (5, 5)
 
-Atomic (default)
+**Atomic (default)**
 
 Guarantees a value is always returned
 Does NOT guarantee the value is correct
@@ -22,13 +22,12 @@ Not fully thread-safe
 
 @property (atomic, strong) NSString *name;
 
-
-Issue:
+**Issue:**
 Multiple threads can overwrite the value between reads.
 
 ➡️ Atomic = safe access, unsafe data
 
-Nonatomic
+**Nonatomic**
 
 Faster
 No locking
