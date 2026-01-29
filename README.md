@@ -32,6 +32,11 @@
   Preferred in iOS (UI runs on main thread)
   @property (nonatomic, strong) NSString *name;
 
+
+
+
+
+
 2️⃣ strong vs weak vs assign
 These define how ownership of an object is handled under ARC.
 🧠 Ownership Rule
@@ -83,6 +88,9 @@ C structs
     @property (assign) NSString *name; // ❌ Wrong
     If the string deallocates, the pointer becomes dangling → crash.
 
+
+
+
 3️⃣ copy vs strong
 This is about protecting against mutation.
 
@@ -117,3 +125,104 @@ NSString	✅ Yes
 NSArray	✅ Yes
 NSDictionary	✅ Yes
 Mutable versions	❌ Usually strong
+Objective-C Memory Management — Advanced Topics
+    4️⃣ Retain Cycles
+    🧠 What is a Retain Cycle?
+        A retain cycle happens when two objects strongly reference each other, so neither can be deallocated.
+        ARC cannot break retain cycles automatically.
+
+❌ Problem Example
+
+    @interface Person : NSObject
+        @property (strong) Car *car;
+    @end
+
+    @interface Car : NSObject
+        @property (strong) Person *owner;
+    @end
+
+    Person *p = [[Person alloc] init];
+    Car *c = [[Car alloc] init];
+
+    p.car = c;     // Person strongly owns Car
+    d.owner = p;   // Car strongly owns Person
+
+✅ Solution: Use weak
+
+    @interface Dog : NSObject
+        @property (weak) Person *owner;
+    @end
+
+
+5️⃣ ARC vs MRC
+Feature	ARC	MRC
+Memory management	Automatic	Manual
+Use retain/release	❌ No	✅ Yes
+
+🔷 Manual reference counting
+
+You manage memory yourself.
+
+Person *p = [[Person alloc] init];  // retain count = 1
+
+[p retain];   // retain count = 2
+[p release];  // retain count = 1
+[p release];  // retain count = 0 → dealloc called
+
+If you forget release → memory leak If you over-release → crash
+
+
+
+
+🔷 Automatic reference counting
+
+Compiler inserts memory calls for you.
+
+Person *p = [[Person alloc] init];
+When no strong references remain → ARC deallocates automatically.
+You still control ownership using strong, weak, retian and copy
+
+
+
+
+6️⃣ Autorelease Pool
+    What is an Autorelease Pool?
+        A memory pool that holds temporary objects and releases them later.
+Used heavily in:
+    Event loops
+    Background threads
+    Loops creating many objects
+
+🔷 How It Works (Concept)
+
+NSString *str = [[[NSString alloc] initWithString:@"Hello"] autorelease];
+Object is added to autorelease pool → released when pool drains.
+
+🔷 ARC Version
+ARC still uses autorelease pools behind the scenes.
+
+@autoreleasepool {
+    NSString *str = [NSString stringWithFormat:@"Hello"];
+}
+When the block ends → temporary objects released.
+
+❗ Why It Matters (Interview Favorite)
+Without autorelease pool in loops → memory spikes
+❌ Bad Example
+
+for (int i = 0; i < 100000; i++) {
+    NSString *str = [NSString stringWithFormat:@"Number %d", i];
+}
+Memory grows until loop ends.
+
+✅ Correct Way
+
+for (int i = 0; i < 100000; i++) {
+    @autoreleasepool {
+        NSString *str = [NSString stringWithFormat:@"Number %d", i];
+    }
+}
+Temporary objects are released every iteration.
+
+
+
