@@ -22,10 +22,7 @@ Not fully thread-safe
 
 @property (atomic, strong) NSString *name;
 
-**Issue:**
-Multiple threads can overwrite the value between reads.
-
-➡️ Atomic = safe access, unsafe data
+**➡️ Atomic = safe access, unsafe data**
 
 **Nonatomic**
 
