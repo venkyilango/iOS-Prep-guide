@@ -35,45 +35,85 @@
 2️⃣ strong vs weak vs assign
 These define how ownership of an object is handled under ARC.
 🧠 Ownership Rule
-strong → You own the object
-weak → You don’t own it
-assign → No memory management
+	strong → You own the object
+	weak → You don’t own it
+	assign → No memory management
+
 🔷 strong
-@property (strong, nonatomic) NSString *name;
+	@property (strong, nonatomic) NSString *name;
 Meaning
-Increases retain count
-Keeps the object alive
-Default for object types
+	Increases retain count
+	Keeps the object alive
+	Default for object types
 Use When
-Your object should own the value
-Models, data properties, containers
+	Your object should own the value
+	Models, data properties, containers
 Example
 self.name = [[NSString alloc] initWithString:@"John"];
 Even if no other reference exists, the object stays alive because this property owns it.
+
+
 🔷 weak
 @property (weak, nonatomic) id delegate;
 Meaning
-Does not increase retain count
-Automatically becomes nil when object deallocates
-Prevents retain cycles
+    Does not increase retain count
+    Automatically becomes nil when object deallocates
+    Prevents retain cycles
 Use When
-Delegates
-Parent–child references
-Avoiding memory leaks
+    Delegates
+    Parent–child references
+    Avoiding memory leaks
 Example — Retain Cycle Prevention
-@interface Child : NSObject
-@property (weak) Parent *parent;
-@end
+    @interface Child : NSObject
+        @property (weak) Parent *parent;
+    @end
 If parent were strong, both objects would hold each other forever → memory leak.
+
+
 🔷 assign
 @property (assign, nonatomic) int age;
 Meaning
-Direct value assignment
-No ownership
-No ARC memory handling
+    Direct value assignment
+    No ownership
+    No ARC memory handling
 Use For
-int, float, double, BOOL
+    int, float, double, BOOL
 C structs
 ⚠️ Dangerous With Objects
-@property (assign) NSString *name; // ❌ Wrong
-If the string deallocates, the pointer becomes dangling → crash.
+    @property (assign) NSString *name; // ❌ Wrong
+    If the string deallocates, the pointer becomes dangling → crash.
+
+3️⃣ copy vs strong
+This is about protecting against mutation.
+
+🔷 strong
+    Keeps a reference to the same object.
+
+@property (strong) NSMutableString *name;
+Problem Example
+
+    NSMutableString *str = [NSMutableString stringWithString:@"John"];
+    self.name = str;
+    [str appendString:@" Wick"];
+    NSLog(@"%@", self.name);  // John Wick 😱
+Your property changed because the original object changed.
+
+🔷 copy
+Creates a new immutable copy when assigned.
+
+    @property (copy) NSString *name;
+Safe Example
+
+    NSMutableString *str = [NSMutableString stringWithString:@"John"];
+    self.name = str;
+    [str appendString:@" Wick"];
+    NSLog(@"%@", self.name);  // John ✅
+
+External mutation does not affect your property.
+
+📌 When to Use copy
+Type	Use copy?
+NSString	✅ Yes
+NSArray	✅ Yes
+NSDictionary	✅ Yes
+Mutable versions	❌ Usually strong
